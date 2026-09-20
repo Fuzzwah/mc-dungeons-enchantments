@@ -61,6 +61,7 @@
     evaluatorForm: document.querySelector("#evaluator-form"),
     itemName: document.querySelector("#item-name"),
     itemCategory: document.querySelector("#item-category"),
+    slotFields: document.querySelector(".slot-fields"),
     slotSelects: [...document.querySelectorAll(".slot-select")],
     evaluationResult: document.querySelector("#evaluation-result"),
   };
@@ -167,14 +168,35 @@
       .filter((record) => record.category === state.itemCategory)
       .sort((a, b) => a.name.localeCompare(b.name));
   }
-
   function renderEvaluatorOptions() {
     const options = evaluatorOptions();
     elements.slotSelects.forEach((select, index) => {
       const selected = state.slots[index];
+      const selectedItem = options.find((item) => item.id === selected);
       select.innerHTML = `<option value="">Choose an enchantment</option>${options.map((item) => `
         <option value="${escapeHtml(item.id)}" ${item.id === selected ? "selected" : ""}>${escapeHtml(item.name)} — ${item.rank} tier</option>
       `).join("")}`;
+      select.classList.add("native-slot-select");
+      select.setAttribute("aria-hidden", "true");
+      let picker = select.parentElement.querySelector(".custom-slot-picker");
+      if (!picker) {
+        select.insertAdjacentHTML("afterend", `<div class="custom-slot-picker" data-slot-picker="${index}"></div>`);
+        picker = select.parentElement.querySelector(".custom-slot-picker");
+      }
+      picker.innerHTML = `
+        <button class="slot-picker-toggle" type="button" aria-haspopup="listbox" aria-expanded="false">
+          ${selectedItem ? `<img src="${escapeHtml(selectedItem.icon)}" alt="" width="42" height="42"><span>${escapeHtml(selectedItem.name)}<em>${selectedItem.rank} tier</em></span>` : "<span>Choose an enchantment</span>"}
+          <span class="picker-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div class="slot-picker-menu" role="listbox" hidden>
+          <button class="slot-picker-option is-empty" type="button" role="option" data-slot-value="">Clear slot</button>
+          ${options.map((item) => `
+            <button class="slot-picker-option ${item.id === selected ? "is-selected" : ""}" type="button" role="option" data-slot-value="${escapeHtml(item.id)}">
+              <img src="${escapeHtml(item.icon)}" alt="" width="42" height="42">
+              <span>${escapeHtml(item.name)}<em>${item.rank} tier · ${rankLabels[item.rank]}</em></span>
+            </button>
+          `).join("")}
+        </div>`;
     });
   }
 
@@ -330,36 +352,42 @@
     const placements = item.entries.map((entry) => {
       const hasValues = entry.tiers.some((value) => value !== "—");
       return `
-        <section class="dialog-section">
+        <section class="dialog-section" style="--category-color:${categoryColors[entry.category]}">
           <div class="placement-heading">
-            <h3>${entry.category}</h3>
+            <h3>${entry.category} upgrade tiers</h3>
             <span class="rank-badge" style="--rank-color:${rankColors[entry.rank]}" title="${entry.rank} tier — ${rankLabels[entry.rank]}">${entry.rank}</span>
           </div>
           ${hasValues ? `
-            <div class="dialog-tier-grid">
-              ${entry.tiers.map((value, index) => `<div><span>Tier ${["I", "II", "III"][index]}</span><strong>${escapeHtml(value)}</strong></div>`).join("")}
+            <div class="dialog-upgrade-list">
+              ${entry.tiers.map((value, index) => `
+                <div class="dialog-upgrade-row ${index === 0 ? "is-current" : ""}">
+                  <span class="tier-diamond"><span>${["I", "II", "III"][index]}</span></span>
+                  <strong>${escapeHtml(value)}</strong>
+                </div>`).join("")}
             </div>
             <p class="tier-metric">Scales by ${escapeHtml(entry.tierLabel.toLowerCase())}.</p>
           ` : `<p class="tier-metric">This effect is fixed on its unique equipment and cannot be rolled normally.</p>`}
-          ${entry.builtInto.length ? `
-            <div class="dialog-section">
-              <h3>Built into</h3>
-              <div class="item-list">${entry.builtInto.map((name) => `<span>${escapeHtml(name)}</span>`).join("")}</div>
-            </div>` : ""}
         </section>`;
     }).join("");
+    const builtInto = item.builtInto?.length ? `
+      <section class="dialog-section dialog-built-into">
+        <h3>Built into</h3>
+        <div class="item-list">${item.builtInto.map((name) => `<span>${escapeHtml(name)}</span>`).join("")}</div>
+      </section>` : "";
 
     elements.dialogContent.innerHTML = `
       <div class="dialog-body" style="--category-color:${color}">
         <div class="dialog-hero">
-          <div class="dialog-icon-well">${iconMarkup(lead)}</div>
-          <div>
+          <div class="dialog-hero-copy">
+            <div class="dialog-rarity">${escapeHtml(lead.rarity)}${lead.rarity === "Powerful" ? " enchantment" : ""}</div>
             <div class="tag-row">${item.categories.map((category) => `<span class="category-tag" style="--tag-color:${categoryColors[category]}">${category}</span>`).join("")}</div>
             <h2 id="dialog-title">${escapeHtml(item.name)}</h2>
             <p>${escapeHtml(lead.description)}</p>
           </div>
+          <div class="dialog-icon-well">${iconMarkup(lead)}</div>
         </div>
         ${placements}
+        ${builtInto}
       </div>`;
     elements.dialog.showModal();
   }
@@ -411,6 +439,39 @@
       select.addEventListener("change", () => {
         state.slots[index] = select.value;
         renderEvaluationResult();
+      });
+    });
+
+    elements.slotFields.addEventListener("click", (event) => {
+      const toggle = event.target.closest(".slot-picker-toggle");
+      if (toggle) {
+        const picker = toggle.closest(".custom-slot-picker");
+        const menu = picker.querySelector(".slot-picker-menu");
+        const open = menu.hidden;
+        document.querySelectorAll(".slot-picker-menu").forEach((otherMenu) => {
+          otherMenu.hidden = true;
+          otherMenu.previousElementSibling?.setAttribute("aria-expanded", "false");
+        });
+        menu.hidden = !open;
+        toggle.setAttribute("aria-expanded", String(open));
+        return;
+      }
+
+      const option = event.target.closest(".slot-picker-option");
+      if (!option) return;
+      const picker = option.closest(".custom-slot-picker");
+      const index = Number(picker.dataset.slotPicker);
+      state.slots[index] = option.dataset.slotValue;
+      elements.slotSelects[index].value = state.slots[index];
+      renderEvaluatorOptions();
+      renderEvaluationResult();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (event.target.closest(".custom-slot-picker")) return;
+      document.querySelectorAll(".slot-picker-menu").forEach((menu) => {
+        menu.hidden = true;
+        menu.previousElementSibling?.setAttribute("aria-expanded", "false");
       });
     });
 
