@@ -61,6 +61,7 @@
     tierCategorySwitcher: document.querySelector("#tier-category-switcher"),
     search: document.querySelector("#search"),
     sort: document.querySelector("#sort"),
+    sortControl: document.querySelector(".sort-control"),
     catalogueGrid: document.querySelector("#catalogue-grid"),
     tierBoard: document.querySelector("#tier-board"),
     resultCount: document.querySelector("#result-count"),
@@ -75,6 +76,7 @@
     slotFields: document.querySelector(".slot-fields"),
     slotSelects: [...document.querySelectorAll(".slot-select")],
     evaluationResult: document.querySelector("#evaluation-result"),
+    themeToggle: document.querySelector("#theme-toggle"),
   };
 
   function escapeHtml(value) {
@@ -156,12 +158,14 @@
   }
 
   function renderCategoryControls() {
-    elements.categoryFilters.innerHTML = categories.map((category) => `
+    const visibleCategories = state.view === "tier" ? gearCategories : categories;
+    const activeCategory = state.view === "tier" ? state.tierCategory : state.category;
+    elements.categoryFilters.innerHTML = visibleCategories.map((category) => `
       <button
         type="button"
-        class="filter-chip ${state.category === category ? "is-active" : ""}"
+        class="filter-chip ${activeCategory === category ? "is-active" : ""}"
         data-category="${category}"
-        aria-pressed="${state.category === category}"
+        aria-pressed="${activeCategory === category}"
         style="--chip-color:${categoryColors[category]}"
       >${category}</button>
     `).join("");
@@ -360,7 +364,6 @@
     elements.emptyState.hidden = tierRecords.length !== 0 || state.view !== "tier";
     elements.tierView.hidden = state.view !== "tier" || tierRecords.length === 0;
   }
-
   function setView(view) {
     state.view = view;
     elements.viewTabs.forEach((tab) => {
@@ -368,8 +371,10 @@
       tab.classList.toggle("is-active", active);
       tab.setAttribute("aria-selected", String(active));
     });
-    elements.filtersRow.hidden = view !== "catalogue";
+    elements.filtersRow.hidden = view === "evaluator";
     elements.familyFilterRow.hidden = view === "evaluator";
+    elements.sortControl.hidden = view !== "catalogue";
+    elements.tierCategorySwitcher.hidden = true;
     elements.catalogueView.hidden = view !== "catalogue";
     elements.tierView.hidden = view !== "tier";
     elements.evaluatorView.hidden = view !== "evaluator";
@@ -445,13 +450,29 @@
     }
   }
 
+  function setTheme(dark) {
+    document.body.classList.toggle("dark-mode", dark);
+    elements.themeToggle.setAttribute("aria-pressed", String(dark));
+    elements.themeToggle.querySelector(".theme-toggle-label").textContent = dark ? "Light mode" : "Dark mode";
+    elements.themeToggle.querySelector("[aria-hidden]").textContent = dark ? "○" : "◐";
+    localStorage.setItem("enchantment-theme", dark ? "dark" : "light");
+  }
+
+  function initTheme() {
+    const saved = localStorage.getItem("enchantment-theme");
+    setTheme(saved === "dark");
+  }
+
   function bindEvents() {
     elements.viewTabs.forEach((tab) => tab.addEventListener("click", () => setView(tab.dataset.view)));
-
     elements.categoryFilters.addEventListener("click", (event) => {
       const button = event.target.closest("[data-category]");
       if (!button) return;
-      state.category = button.dataset.category;
+      if (state.view === "tier") {
+        state.tierCategory = button.dataset.category;
+      } else {
+        state.category = button.dataset.category;
+      }
       render();
     });
 
@@ -574,6 +595,7 @@
     const uniqueCount = new Set(records.map((record) => record.name)).size;
     document.querySelector("#unique-count").textContent = uniqueCount;
     document.querySelector("#placement-count").textContent = records.length;
+    initTheme();
     bindEvents();
     render();
   }
