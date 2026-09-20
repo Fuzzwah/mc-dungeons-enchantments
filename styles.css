@@ -1876,3 +1876,70 @@ footer p {
     font-size: 2.35rem;
   }
 }
+.family-filter-row {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding-top: 2px;
+}
+
+.family-filter-label {
+  color: var(--faint);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.family-filters {
+  display: flex;
+  flex: 1 1 500px;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.family-filter {
+  min-height: 32px;
+  padding: 0 10px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.76rem;
+  font-weight: 800;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+
+.family-filter::before,
+.family-tag::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  content: "";
+  background: var(--family-color);
+  box-shadow: 0 0 6px var(--family-color);
+  transform: rotate(45deg);
+}
+
+.family-filter:hover,
+.family-filter.is-active {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--family-color) 65%, transparent);
+  background: color-mix(in srgb, var(--family-color) 11%, transparent);
+}
+
+.family-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  color: color-mix(in srgb, var(--family-color) 82%, white);
+  border: 1px solid color-mix(in srgb, var(--family-color) 45%, var(--line));
+  background: color-mix(in srgb, var(--family-color) 8%, transparent);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
