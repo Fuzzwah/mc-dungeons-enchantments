@@ -3,10 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#101322">
+    <meta name="theme-color" content="#e52b27">
     <meta name="description" content="A searchable visual reference and endgame tier list for every player gear enchantment in Minecraft Dungeons.">
-    <title>Minecraft Dungeons Enchantment Archive</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%237f5af0' d='M16 1 30 16 16 31 2 16z'/%3E%3Cpath fill='%23101422' d='m18 6-8 11h6l-2 9 8-12h-6z'/%3E%3C/svg%3E">
+    <title>Enchantment Archive // Public Access Terminal</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -27,6 +26,10 @@
           <div><strong id="unique-count">—</strong><span>Enchantments</span></div>
           <div><strong id="placement-count">—</strong><span>Gear placements</span></div>
         </div>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+          <span aria-hidden="true">◐</span>
+          <span class="theme-toggle-label">Dark mode</span>
+        </button>
       </div>
     </header>
 
@@ -69,6 +72,7 @@
           <span class="family-filter-label">Playstyle families</span>
           <div class="family-filters" id="family-filters" aria-label="Filter by playstyle family"></div>
         </div>
+        <div class="tier-category-switcher" id="tier-category-switcher" aria-label="Tier list gear category" hidden></div>
       </section>
 
       <section id="catalogue-view" class="content-view" role="tabpanel" aria-labelledby="catalogue-tab">
@@ -90,7 +94,6 @@
           </div>
           <p>Ranked for broad usefulness at Apocalypse +25. Build-specific enchantments can jump several tiers with the right weapon, armour, artifacts, or playstyle.</p>
         </div>
-        <div class="tier-category-switcher" id="tier-category-switcher" aria-label="Tier list gear category"></div>
         <div id="tier-board" class="tier-board"></div>
       </section>
 
