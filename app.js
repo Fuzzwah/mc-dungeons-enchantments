@@ -335,6 +335,7 @@
   function renderTierBoard() {
     const tierRecords = records
       .filter((record) => record.category === state.tierCategory)
+      .filter((record) => matchesFamily(record))
       .filter((record) => matchesQuery({ ...record, categories: [record.category] }));
 
     elements.tierBoard.innerHTML = tierOrder.map((rank) => {
@@ -368,7 +369,7 @@
       tab.setAttribute("aria-selected", String(active));
     });
     elements.filtersRow.hidden = view !== "catalogue";
-    elements.familyFilterRow.hidden = view !== "catalogue";
+    elements.familyFilterRow.hidden = view === "evaluator";
     elements.catalogueView.hidden = view !== "catalogue";
     elements.tierView.hidden = view !== "tier";
     elements.evaluatorView.hidden = view !== "evaluator";
