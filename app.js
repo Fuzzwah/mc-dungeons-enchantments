@@ -5,6 +5,14 @@
   const records = payload.records;
   const categories = ["All", "Melee", "Ranged", "Armor", "Built-in"];
   const gearCategories = categories.slice(1);
+  const familyDefinitions = [
+    { id: "roll", label: "Roll & Evade", color: "#b990ff", test: /roll|dodge|evade|tumble|swiftfoot|acrobat/i },
+    { id: "souls", label: "Soul Build", color: "#a58cff", test: /soul/i },
+    { id: "artifacts", label: "Artifact Loop", color: "#f4ba55", test: /artifact/i },
+    { id: "elemental", label: "Elemental Damage", color: "#ff7f8d", test: /fire|poison|lightning|thunder|shock|electr|freeze|chill|burn/i },
+    { id: "control", label: "Crowd Control", color: "#65c7ff", test: /stun|bind|hold|slow|pull|gravity|levitation|chain/i },
+    { id: "survival", label: "Survival & Healing", color: "#75df9b", test: /health|heal|shield|damage reduction|protect|weakening|potion/i },
+  ];
   const tierOrder = ["S", "A", "B", "C", "D"];
   const rankScore = { S: 5, A: 4, B: 3, C: 2, D: 1 };
   const rankLabels = {
@@ -32,6 +40,7 @@
   const state = {
     view: "catalogue",
     category: "All",
+    family: "All",
     tierCategory: "Melee",
     query: "",
     sort: "name",
@@ -47,6 +56,8 @@
     evaluatorView: document.querySelector("#evaluator-view"),
     filtersRow: document.querySelector(".filters-row"),
     categoryFilters: document.querySelector("#category-filters"),
+    familyFilters: document.querySelector("#family-filters"),
+    familyFilterRow: document.querySelector(".family-filter-row"),
     tierCategorySwitcher: document.querySelector("#tier-category-switcher"),
     search: document.querySelector("#search"),
     sort: document.querySelector("#sort"),
@@ -75,6 +86,13 @@
       .replaceAll("'", "&#039;");
   }
 
+  function getFamilies(item) {
+    const haystack = `${item.name} ${item.description}`.toLowerCase();
+    return familyDefinitions
+      .filter((family) => family.test.test(haystack))
+      .map((family) => family.id);
+  }
+
   function getUniqueGroups(source = records) {
     const groups = new Map();
     source.forEach((record) => {
@@ -92,8 +110,8 @@
       );
       return {
         ...lead,
-        id: `group-${lead.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
         entries,
+        families: [...new Set(entries.flatMap(getFamilies))],
         categories: entries.map((entry) => entry.category),
         builtInto: [...new Set(entries.flatMap((entry) => entry.builtInto))],
       };
@@ -110,6 +128,9 @@
     ].join(" ").toLowerCase();
     return haystack.includes(state.query);
   }
+  function matchesFamily(item) {
+    return state.family === "All" || (item.families || getFamilies(item)).includes(state.family);
+  }
 
   function catalogueItems() {
     let items;
@@ -118,9 +139,9 @@
     } else {
       items = records
         .filter((record) => record.category === state.category)
-        .map((record) => ({ ...record, entries: [record], categories: [record.category] }));
+        .map((record) => ({ ...record, entries: [record], categories: [record.category], families: getFamilies(record) }));
     }
-    items = items.filter(matchesQuery);
+    items = items.filter(matchesFamily).filter(matchesQuery);
     items.sort((a, b) => {
       if (state.sort === "tier") {
         return rankScore[b.rank] - rankScore[a.rank] || a.name.localeCompare(b.name);
@@ -143,6 +164,19 @@
         aria-pressed="${state.category === category}"
         style="--chip-color:${categoryColors[category]}"
       >${category}</button>
+    `).join("");
+
+    elements.familyFilters.innerHTML = [
+      { id: "All", label: "All styles", color: "#9a74ff" },
+      ...familyDefinitions,
+    ].map((family) => `
+      <button
+        type="button"
+        class="family-filter ${state.family === family.id ? "is-active" : ""}"
+        data-family="${family.id}"
+        aria-pressed="${state.family === family.id}"
+        style="--family-color:${family.color}"
+      >${family.label}</button>
     `).join("");
 
     elements.tierCategorySwitcher.innerHTML = gearCategories.map((category) => `
@@ -278,6 +312,10 @@
         </div>
         <div class="tag-row">
           ${item.categories.map((category) => `<span class="category-tag" style="--tag-color:${categoryColors[category]}">${category}</span>`).join("")}
+          ${(item.families || []).map((id) => {
+            const family = familyDefinitions.find((entry) => entry.id === id);
+            return `<span class="family-tag" style="--family-color:${family.color}">${family.label}</span>`;
+          }).join("")}
           <span class="rarity-tag ${powerful ? "powerful" : ""}">${powerful ? "Powerful" : item.rarity}</span>
         </div>
         <h3 class="card-name">${escapeHtml(item.name)}</h3>
@@ -330,6 +368,7 @@
       tab.setAttribute("aria-selected", String(active));
     });
     elements.filtersRow.hidden = view !== "catalogue";
+    elements.familyFilterRow.hidden = view !== "catalogue";
     elements.catalogueView.hidden = view !== "catalogue";
     elements.tierView.hidden = view !== "tier";
     elements.evaluatorView.hidden = view !== "evaluator";
@@ -412,6 +451,13 @@
       const button = event.target.closest("[data-category]");
       if (!button) return;
       state.category = button.dataset.category;
+      render();
+    });
+
+    elements.familyFilters.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-family]");
+      if (!button) return;
+      state.family = button.dataset.family;
       render();
     });
 
