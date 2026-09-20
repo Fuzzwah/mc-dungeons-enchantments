@@ -41,6 +41,10 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h4v4H4zm6 0h10v4H10zM4 10h4v4H4zm6 0h7v4h-7zM4 15h4v4H4zm6 0h5v4h-5z"/></svg>
             Tier list
           </button>
+          <button class="view-tab" id="evaluator-tab" type="button" role="tab" aria-selected="false" aria-controls="evaluator-view" data-view="evaluator">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v3H4zm0 5h10v3H4zm0 5h16v3H4zM16 10h4v3h-4z"/></svg>
+            Item evaluator
+          </button>
         </div>
 
         <div class="search-wrap">
@@ -84,6 +88,53 @@
         </div>
         <div class="tier-category-switcher" id="tier-category-switcher" aria-label="Tier list gear category"></div>
         <div id="tier-board" class="tier-board"></div>
+      </section>
+
+      <section id="evaluator-view" class="content-view" role="tabpanel" aria-labelledby="evaluator-tab" hidden>
+        <div class="evaluator-intro">
+          <div>
+            <p class="section-kicker">Build check</p>
+            <h2>Evaluate an item</h2>
+          </div>
+          <p>Enter the enchantments available on an item to estimate its overall tier. The result averages the selected enchantment rankings.</p>
+        </div>
+        <form id="evaluator-form" class="evaluator-form">
+          <label>
+            <span>Item name</span>
+            <input id="item-name" name="itemName" type="text" placeholder="e.g. Whirlwind" autocomplete="off">
+          </label>
+          <label>
+            <span>Gear type</span>
+            <select id="item-category" name="itemCategory">
+              <option value="Melee">Melee</option>
+              <option value="Ranged">Ranged</option>
+              <option value="Armor">Armor</option>
+            </select>
+          </label>
+          <div class="slot-fields">
+            <p class="form-label">Available enchantment slots</p>
+            <label class="slot-field">
+              <span>Slot 1</span>
+              <select class="slot-select" data-slot="0">
+                <option value="">Choose an enchantment</option>
+              </select>
+            </label>
+            <label class="slot-field">
+              <span>Slot 2</span>
+              <select class="slot-select" data-slot="1">
+                <option value="">Choose an enchantment</option>
+              </select>
+            </label>
+            <label class="slot-field">
+              <span>Slot 3</span>
+              <select class="slot-select" data-slot="2">
+                <option value="">Choose an enchantment</option>
+              </select>
+            </label>
+          </div>
+          <button class="evaluate-button" type="submit">Evaluate item</button>
+        </form>
+        <div id="evaluation-result" class="evaluation-result" aria-live="polite"></div>
       </section>
 
       <div id="empty-state" class="empty-state" hidden>

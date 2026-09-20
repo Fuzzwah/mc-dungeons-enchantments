@@ -35,12 +35,16 @@
     tierCategory: "Melee",
     query: "",
     sort: "name",
+    itemName: "",
+    itemCategory: "Melee",
+    slots: ["", "", ""],
   };
 
   const elements = {
     viewTabs: [...document.querySelectorAll(".view-tab")],
     catalogueView: document.querySelector("#catalogue-view"),
     tierView: document.querySelector("#tier-view"),
+    evaluatorView: document.querySelector("#evaluator-view"),
     filtersRow: document.querySelector(".filters-row"),
     categoryFilters: document.querySelector("#category-filters"),
     tierCategorySwitcher: document.querySelector("#tier-category-switcher"),
@@ -54,6 +58,11 @@
     dialog: document.querySelector("#details-dialog"),
     dialogContent: document.querySelector("#dialog-content"),
     dialogClose: document.querySelector(".dialog-close"),
+    evaluatorForm: document.querySelector("#evaluator-form"),
+    itemName: document.querySelector("#item-name"),
+    itemCategory: document.querySelector("#item-category"),
+    slotSelects: [...document.querySelectorAll(".slot-select")],
+    evaluationResult: document.querySelector("#evaluation-result"),
   };
 
   function escapeHtml(value) {
@@ -153,6 +162,71 @@
     return `<img class="${className}" src="${escapeHtml(item.icon)}" alt="" width="72" height="72" loading="lazy">`;
   }
 
+  function evaluatorOptions() {
+    return records
+      .filter((record) => record.category === state.itemCategory)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  function renderEvaluatorOptions() {
+    const options = evaluatorOptions();
+    elements.slotSelects.forEach((select, index) => {
+      const selected = state.slots[index];
+      select.innerHTML = `<option value="">Choose an enchantment</option>${options.map((item) => `
+        <option value="${escapeHtml(item.id)}" ${item.id === selected ? "selected" : ""}>${escapeHtml(item.name)} — ${item.rank} tier</option>
+      `).join("")}`;
+    });
+  }
+
+  function evaluationRank(score) {
+    if (score >= 4.5) return "S";
+    if (score >= 3.5) return "A";
+    if (score >= 2.5) return "B";
+    if (score >= 1.5) return "C";
+    return "D";
+  }
+
+  function renderEvaluationResult() {
+    const selected = state.slots
+      .map((id) => records.find((record) => record.id === id))
+      .filter(Boolean);
+
+    if (!selected.length) {
+      elements.evaluationResult.innerHTML = `
+        <div class="evaluation-empty">
+          <strong>Select at least one enchantment</strong>
+          <span>The evaluator will average the selected enchantment tier ratings.</span>
+        </div>`;
+      return;
+    }
+
+    const score = selected.reduce((total, item) => total + rankScore[item.rank], 0) / selected.length;
+    const rank = evaluationRank(score);
+    const itemName = state.itemName || "Unnamed item";
+    elements.evaluationResult.innerHTML = `
+      <div class="evaluation-summary" style="--rank-color:${rankColors[rank]}">
+        <div class="evaluation-rating">
+          <span>Estimated item tier</span>
+          <strong>${rank}</strong>
+          <em>${rankLabels[rank]}</em>
+        </div>
+        <div class="evaluation-copy">
+          <p class="section-kicker">${escapeHtml(state.itemCategory)} item report</p>
+          <h3>${escapeHtml(itemName)}</h3>
+          <p>Average enchantment rating: <strong>${score.toFixed(1)} / 5</strong> across ${selected.length} selected slot${selected.length === 1 ? "" : "s"}.</p>
+        </div>
+      </div>
+      <div class="evaluation-slots">
+        ${state.slots.map((id, index) => {
+          const item = records.find((record) => record.id === id);
+          return `<div class="evaluation-slot">
+            <span>Slot ${index + 1}</span>
+            ${item ? `<strong>${escapeHtml(item.name)}</strong><em class="mini-rank" style="--rank-color:${rankColors[item.rank]}">${item.rank} · ${rankLabels[item.rank]}</em>` : "<strong class=\"unfilled-slot\">Not selected</strong>"}
+          </div>`;
+        }).join("")}
+      </div>`;
+  }
+
   function tierPreview(item) {
     const values = item.tiers || [];
     if (values.every((value) => value === "—")) {
@@ -234,6 +308,9 @@
       tab.setAttribute("aria-selected", String(active));
     });
     elements.filtersRow.hidden = view !== "catalogue";
+    elements.catalogueView.hidden = view !== "catalogue";
+    elements.tierView.hidden = view !== "tier";
+    elements.evaluatorView.hidden = view !== "evaluator";
     render();
   }
 
@@ -289,12 +366,14 @@
 
   function render() {
     renderCategoryControls();
+    elements.emptyState.hidden = true;
     if (state.view === "catalogue") {
       renderCatalogue();
-      elements.tierView.hidden = true;
-    } else {
+    } else if (state.view === "tier") {
       renderTierBoard();
-      elements.catalogueView.hidden = true;
+    } else {
+      renderEvaluatorOptions();
+      renderEvaluationResult();
     }
   }
 
@@ -313,6 +392,26 @@
       if (!button) return;
       state.tierCategory = button.dataset.tierCategory;
       render();
+    });
+
+    elements.itemCategory.addEventListener("change", () => {
+      state.itemCategory = elements.itemCategory.value;
+      state.slots = ["", "", ""];
+      renderEvaluatorOptions();
+      renderEvaluationResult();
+    });
+
+    elements.evaluatorForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      state.itemName = elements.itemName.value.trim();
+      renderEvaluationResult();
+    });
+
+    elements.slotSelects.forEach((select, index) => {
+      select.addEventListener("change", () => {
+        state.slots[index] = select.value;
+        renderEvaluationResult();
+      });
     });
 
     elements.search.addEventListener("input", () => {
