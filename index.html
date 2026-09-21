@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#e52b27">
+    <meta name="theme-color" content="#011627">
     <meta name="description" content="A searchable visual reference and endgame tier list for every player gear enchantment in Minecraft Dungeons.">
     <title>Enchantment Archive // Public Access Terminal</title>
-    <link rel="stylesheet" href="styles.css?v=nightowl">
+    <link rel="stylesheet" href="styles.css?v=items5">
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to enchantments</a>
@@ -43,6 +43,10 @@
           <button class="view-tab" id="tier-tab" type="button" role="tab" aria-selected="false" aria-controls="tier-view" data-view="tier">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h4v4H4zm6 0h10v4H10zM4 10h4v4H4zm6 0h7v4h-7zM4 15h4v4H4zm6 0h5v4h-5z"/></svg>
             Tier list
+          </button>
+          <button class="view-tab" id="loadout-tab" type="button" role="tab" aria-selected="false" aria-controls="loadout-view" data-view="loadout">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v4H4zm0 6h7v8H4zm9 0h7v8h-7z"/></svg>
+            Loadouts
           </button>
           <button class="view-tab" id="evaluator-tab" type="button" role="tab" aria-selected="false" aria-controls="evaluator-view" data-view="evaluator">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v3H4zm0 5h10v3H4zm0 5h16v3H4zM16 10h4v3h-4z"/></svg>
@@ -95,6 +99,16 @@
           <p>Ranked for broad usefulness at Apocalypse +25. Build-specific enchantments can jump several tiers with the right weapon, armour, artifacts, or playstyle.</p>
         </div>
         <div id="tier-board" class="tier-board"></div>
+      </section>
+      <section id="loadout-view" class="content-view" role="tabpanel" aria-labelledby="loadout-tab" hidden>
+        <div class="loadout-intro">
+          <div>
+            <p class="section-kicker">Build systems</p>
+            <h2>Loadout index</h2>
+          </div>
+          <p>Editorial gear guidance for the playstyles in this archive. These recommendations are starting points, not a replacement for checking your enchantment rolls.</p>
+        </div>
+        <div id="loadout-grid" class="loadout-grid"></div>
       </section>
 
       <section id="evaluator-view" class="content-view" role="tabpanel" aria-labelledby="evaluator-tab" hidden>
@@ -168,6 +182,6 @@
     </dialog>
 
     <script src="data.js?v=2"></script>
-    <script src="app.js?v=nightowl2"></script>
+    <script src="app.js?v=items6"></script>
   </body>
 </html>

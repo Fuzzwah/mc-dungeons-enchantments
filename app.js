@@ -13,6 +13,182 @@
     { id: "control", label: "Crowd Control", color: "#65c7ff", test: /stun|bind|hold|slow|pull|gravity|levitation|chain/i },
     { id: "survival", label: "Survival & Healing", color: "#75df9b", test: /health|heal|shield|damage reduction|protect|weakening|potion/i },
   ];
+  const loadoutDefinitions = [
+    {
+      id: "roll",
+      label: "Roll & Evade",
+      code: "F-01 / KINETIC ESCAPE",
+      summary: "Turn movement into damage and treat every roll as part of the attack cycle.",
+      armor: [{ name: "Ember Robe", tier: "S", note: "Short-range burst and a natural fit for roll-through damage." }, { name: "Fox Armor", tier: "A", note: "A safer mobility option with room for defensive enchantments." }],
+      weapons: [{ name: "Fighters Bindings", tier: "S", note: "Fast attacks keep the roll-and-strike loop active." }, { name: "Whirlwind", tier: "A", note: "Wide melee coverage while moving through packs." }],
+      ranged: [{ name: "Harp Crossbow", tier: "A", note: "Spreads the movement loop across clustered targets." }, { name: "Auto Crossbow", tier: "B", note: "A safer ranged fallback when the front line is crowded." }],
+      artifacts: [{ name: "Boots of Swiftness", tier: "S", note: "The defining movement tool for the family." }, { name: "Death Cap Mushroom", tier: "S", note: "Converts speed into a decisive damage window." }, { name: "Wind Horn", tier: "A", note: "Creates space before the next roll sequence." }],
+    },
+    {
+      id: "souls",
+      label: "Soul Build",
+      code: "F-02 / SOUL CONVERSION",
+      summary: "Generate souls consistently, then spend them on healing, control, and burst windows.",
+      armor: [{ name: "Wither Armor", tier: "S", note: "Defensive soul synergy for a build that stays in danger." }, { name: "Soul Dancer Robe", tier: "A", note: "A more mobile soul-focused alternative." }],
+      weapons: [{ name: "Soul Fists", tier: "S", note: "Directly reinforces soul collection and close-range damage." }, { name: "Feral Soul Crossbow", tier: "A", note: "Keeps soul generation online from safer range." }],
+      ranged: [{ name: "Feral Soul Crossbow", tier: "S", note: "Keeps soul generation online from safer range." }, { name: "Bow of Lost Souls", tier: "A", note: "Extends the soul engine without abandoning ranged play." }],
+      artifacts: [{ name: "Harvester", tier: "S", note: "Reliable soul spend for burst damage and crowd clear." }, { name: "Corrupted Beacon", tier: "A", note: "High-output channelled spend when positioning is safe." }, { name: "Soul Lantern", tier: "A", note: "Adds another soul-powered body to the field." }],
+    },
+    {
+      id: "artifacts",
+      label: "Artifact Loop",
+      code: "F-03 / COOLDOWN ECONOMY",
+      summary: "Build around frequent artifact casts and let cooldown reduction become the engine.",
+      armor: [{ name: "Cave Crawler", tier: "S", note: "Artifact damage amplification defines the loadout." }, { name: "Archer's Armor", tier: "A", note: "A ranged variant with strong artifact flexibility." }],
+      weapons: [{ name: "Truthseeker", tier: "A", note: "Reliable melee platform for an artifact-first build." }, { name: "Elite Power Bow", tier: "A", note: "Keeps the loop useful while playing at range." }],
+      ranged: [{ name: "Elite Power Bow", tier: "A", note: "A reliable platform for artifact-enhanced burst." }, { name: "Harp Crossbow", tier: "A", note: "Spreads artifact effects across grouped targets." }],
+      artifacts: [{ name: "Satchel of Elements", tier: "S", note: "Flexible elemental output across encounters." }, { name: "Gong of Weakening", tier: "S", note: "Turns a timed artifact window into a boss solution." }, { name: "Lightning Rod", tier: "A", note: "A direct high-impact artifact spend." }],
+    },
+    {
+      id: "elemental",
+      label: "Elemental Damage",
+      code: "F-04 / DAMAGE SPECTRUM",
+      summary: "Layer fire, poison, lightning, and cold effects to make the battlefield do the work.",
+      armor: [{ name: "Ember Robe", tier: "S", note: "Fire-focused close-range output with artifact overlap." }, { name: "Frost Bite", tier: "A", note: "Adds a control layer to elemental damage." }],
+      weapons: [{ name: "Firebrand", tier: "S", note: "A direct fire identity for melee elemental builds." }, { name: "Harp Crossbow", tier: "A", note: "Spreads effect payloads across clustered targets." }],
+      ranged: [{ name: "Firebolt Thrower", tier: "S", note: "Carries elemental payloads across a wide lane." }, { name: "Imploding Crossbow", tier: "A", note: "Groups targets for chained elemental effects." }],
+      artifacts: [{ name: "Satchel of Elements", tier: "S", note: "The broadest elemental artifact platform." }, { name: "Corrupted Beacon", tier: "A", note: "Sustained beam damage for controlled positions." }, { name: "Shock Powder", tier: "A", note: "Adds a lightning control pulse to the rotation." }],
+    },
+    {
+      id: "control",
+      label: "Crowd Control",
+      code: "F-05 / FIELD MANAGEMENT",
+      summary: "Slow, pull, stun, and separate threats so the encounter stays ordered.",
+      armor: [{ name: "Spider Armor", tier: "S", note: "Life steal and melee control support sustained front-line presence." }, { name: "Stalwart Armor", tier: "A", note: "Trades some control for safer anchoring." }],
+      weapons: [{ name: "Gravity Hammer", tier: "S", note: "Pull and impact effects compress the battlefield." }, { name: "Anchor", tier: "A", note: "Heavy hits reward deliberate enemy grouping." }],
+      ranged: [{ name: "Feral Soul Crossbow", tier: "A", note: "Slows the encounter from a safer distance." }, { name: "Harp Crossbow", tier: "A", note: "Multi-projectile pressure helps maintain control." }],
+      artifacts: [{ name: "Wind Horn", tier: "S", note: "Repositions entire groups on demand." }, { name: "Shock Powder", tier: "S", note: "A reliable stun pulse for interrupt windows." }, { name: "Corrupted Beacon", tier: "A", note: "Punishes enemies once the field is controlled." }],
+    },
+    {
+      id: "survival",
+      label: "Survival & Healing",
+      code: "F-06 / DAMAGE ABSORPTION",
+      summary: "Stay in the middle of the fight, reduce incoming damage, and create time for the team.",
+      armor: [{ name: "Stalwart Armor", tier: "S", note: "The clearest defensive baseline for a committed frontliner." }, { name: "Wither Armor", tier: "A", note: "Damage reduction with soul-build overlap." }],
+      weapons: [{ name: "Cursed Axe", tier: "S", note: "Sustained melee clearing keeps pressure off the back line." }, { name: "Heartstealer", tier: "A", note: "Healing on hit supports a close-range durable role." }],
+      ranged: [{ name: "Slayer Crossbow", tier: "A", note: "Reliable ranged pressure while the tank holds the line." }, { name: "Bow of Lost Souls", tier: "B", note: "Adds safe soul generation to a defensive setup." }],
+      artifacts: [{ name: "Iron Hide Amulet", tier: "S", note: "The defining defensive cooldown for a true tank." }, { name: "Totem of Regeneration", tier: "A", note: "Anchors a safe zone for the party." }, { name: "Gong of Weakening", tier: "A", note: "Makes dangerous elite windows manageable." }],
+    },
+  ];
+  const loadoutImageFiles = {
+    "Fighters Bindings": "Fighter's Bindings (MCD).png",
+    "Archer's Armor": "Archer's Armor (MCD).png",
+    "Soul Dancer Robe": "Souldancer Robe (MCD).png",
+    "Gravity Hammer": "Hammer of Gravity (MCD).png",
+  };
+
+  function loadoutImageMarkup(name) {
+    const filename = loadoutImageFiles[name] || `${name} (MCD).png`;
+    return `<img class="loadout-item-image" data-file-name="${escapeHtml(filename)}" alt="" width="48" height="48" loading="lazy">`;
+  }
+
+  async function resolveLoadoutImages() {
+    const images = [...document.querySelectorAll(".loadout-item-image")];
+    const filenames = [...new Set(images.map((image) => image.dataset.fileName))];
+    if (!filenames.length) return;
+    const params = new URLSearchParams({
+      action: "query",
+      titles: filenames.map((filename) => `File:${filename}`).join("|"),
+      prop: "imageinfo",
+      iiprop: "url",
+      format: "json",
+      origin: "*",
+    });
+    try {
+      const response = await fetch(`https://minecraft.fandom.com/api.php?${params}`);
+      const data = await response.json();
+      const urls = new Map(
+        Object.values(data.query?.pages || {}).map((page) => [
+          page.title.replace(/^File:/, "").replaceAll("_", " "),
+          page.imageinfo?.[0]?.url,
+        ])
+      );
+      images.forEach((image) => {
+        const source = urls.get(image.dataset.fileName);
+        if (source) image.src = source;
+        else image.hidden = true;
+      });
+    } catch {
+      images.forEach((image) => { image.hidden = true; });
+    }
+  }
+
+  const loadoutPageNames = {
+    "Soul Dancer Robe": "Souldancer Robe",
+    "Gravity Hammer": "Hammer of Gravity",
+  };
+  const loadoutItemMeta = new Map();
+
+  function loadoutPageName(name) {
+    return loadoutPageNames[name] || name;
+  }
+
+  function cleanWikiText(value) {
+    return String(value || "")
+      .replace(/\{\{[^{}]*\}\}/g, "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/\[\[([^|\]]+)(?:\|[^\]]+)?\]\]/g, "$1")
+      .replace(/'{2,}/g, "")
+      .replace(/\s+\n/g, "\n")
+      .trim();
+  }
+
+  function extractWikiField(source, field) {
+    const match = source.match(new RegExp(`\\|\\s*${field}\\s*=([\\s\\S]*?)(?=\\n\\|\\s|\\n}})`));
+    return cleanWikiText(match?.[1]);
+  }
+
+  async function resolveLoadoutMetadata() {
+    const names = [...new Set(loadoutDefinitions.flatMap((loadout) =>
+      [...loadout.armor, ...loadout.weapons, ...loadout.ranged, ...loadout.artifacts].map((item) => item.name)
+    ))];
+    const params = new URLSearchParams({
+      action: "query",
+      titles: names.map((name) => `Minecraft_Dungeons:${loadoutPageName(name)}`).join("|"),
+      prop: "revisions",
+      rvprop: "content",
+      rvslots: "main",
+      format: "json",
+      origin: "*",
+    });
+    try {
+      const response = await fetch(`https://minecraft.fandom.com/api.php?${params}`);
+      const data = await response.json();
+      Object.values(data.query?.pages || {}).forEach((page) => {
+        const source = page.revisions?.[0]?.slots?.main?.["*"];
+        if (!source) return;
+        const title = page.title.replace(/^Minecraft[ _]Dungeons:/, "");
+        const itemName = names.find((name) => loadoutPageName(name).replaceAll("_", " ") === title.replaceAll("_", " "));
+        if (!itemName) return;
+        const properties = extractWikiField(source, "property")
+          .split("\n")
+          .map((property) => property.trim())
+          .filter(Boolean);
+        loadoutItemMeta.set(itemName, {
+          rarity: extractWikiField(source, "rarity") || "Source page",
+          properties,
+          sourceUrl: `https://minecraft.fandom.com/wiki/Minecraft_Dungeons:${encodeURIComponent(loadoutPageName(itemName).replaceAll(" ", "_"))}`,
+        });
+      });
+      updateLoadoutMetadata();
+    } catch {
+      // The loadout remains usable when the external metadata service is unavailable.
+    }
+  }
+
+  function updateLoadoutMetadata() {
+    document.querySelectorAll(".loadout-item").forEach((item) => {
+      const meta = loadoutItemMeta.get(item.dataset.itemName);
+      const target = item.querySelector(".loadout-item-properties");
+      if (!meta || !target) return;
+      target.innerHTML = `<span class="loadout-rarity">${escapeHtml(meta.rarity)}</span>${meta.properties.map((property) => `<span>${escapeHtml(property)}</span>`).join("")}`;
+    });
+  }
   const tierOrder = ["S", "A", "B", "C", "D"];
   const rankScore = { S: 5, A: 4, B: 3, C: 2, D: 1 };
   const rankLabels = {
@@ -59,6 +235,8 @@
     familyFilters: document.querySelector("#family-filters"),
     familyFilterRow: document.querySelector(".family-filter-row"),
     tierCategorySwitcher: document.querySelector("#tier-category-switcher"),
+    loadoutView: document.querySelector("#loadout-view"),
+    loadoutGrid: document.querySelector("#loadout-grid"),
     search: document.querySelector("#search"),
     sort: document.querySelector("#sort"),
     sortControl: document.querySelector(".sort-control"),
@@ -364,6 +542,75 @@
     elements.emptyState.hidden = tierRecords.length !== 0 || state.view !== "tier";
     elements.tierView.hidden = state.view !== "tier" || tierRecords.length === 0;
   }
+  function renderLoadouts() {
+    const visibleLoadouts = state.family === "All"
+      ? loadoutDefinitions
+      : loadoutDefinitions.filter((loadout) => loadout.id === state.family);
+    elements.loadoutGrid.innerHTML = visibleLoadouts.map((loadout) => `
+      <article class="loadout-panel">
+        <div class="loadout-panel-head">
+          <div>
+            <p class="section-kicker">${escapeHtml(loadout.code)}</p>
+            <h3>${escapeHtml(loadout.label)}</h3>
+          </div>
+          <a class="loadout-stamp" href="https://minecraft.fandom.com/wiki/Category:Minecraft_Dungeons_gear_icons" target="_blank" rel="noreferrer">Fandom image index ↗</a>
+        </div>
+        <p class="loadout-summary">${escapeHtml(loadout.summary)}</p>
+        <div class="loadout-columns">
+          ${[
+            ["Armor", loadout.armor],
+            ["Melee", loadout.weapons],
+            ["Ranged", loadout.ranged],
+            ["Artifacts", loadout.artifacts],
+          ].map(([category, items]) => `
+            <section class="loadout-slot">
+              <h4>${category}</h4>
+              ${items.map((item) => `
+                <button class="loadout-item" type="button" data-item-name="${escapeHtml(item.name)}">
+                  ${loadoutImageMarkup(item.name)}
+                  <div>
+                    <strong>${escapeHtml(item.name)}</strong>
+                    <div class="loadout-item-properties"><span>${escapeHtml(item.note)}</span></div>
+                  </div>
+                </button>
+              `).join("")}
+            </section>
+          `).join("")}
+        </div>
+      </article>
+    `).join("");
+    resolveLoadoutImages();
+    resolveLoadoutMetadata();
+  }
+
+  function showLoadoutDetails(name) {
+    const item = loadoutDefinitions
+      .flatMap((loadout) => [...loadout.armor, ...loadout.weapons, ...loadout.ranged, ...loadout.artifacts])
+      .find((entry) => entry.name === name);
+    const meta = loadoutItemMeta.get(name);
+    const image = [...document.querySelectorAll(".loadout-item-image")]
+      .find((entry) => entry.closest("[data-item-name]")?.dataset.itemName === name);
+    const sourceUrl = meta?.sourceUrl || `https://minecraft.fandom.com/wiki/Minecraft_Dungeons:${encodeURIComponent(loadoutPageName(name).replaceAll(" ", "_"))}`;
+    const properties = meta?.properties?.length ? meta.properties : [item?.note || "Metadata is loading from the source page."];
+    elements.dialogContent.innerHTML = `
+      <div class="dialog-body loadout-dialog-body">
+        <div class="dialog-hero">
+          <div class="dialog-hero-copy">
+            <div class="dialog-rarity">${escapeHtml(meta?.rarity || "Loadout item")}</div>
+            <h2 id="dialog-title">${escapeHtml(name)}</h2>
+            <p>Loadout guidance is editorial. Check the source page for the complete item record and acquisition details.</p>
+          </div>
+          <div class="dialog-icon-well">${image?.src ? `<img src="${escapeHtml(image.src)}" alt="" width="88" height="88">` : ""}</div>
+        </div>
+        <section class="dialog-section">
+          <h3>Properties</h3>
+          <ul class="loadout-dialog-properties">${properties.map((property) => `<li>${escapeHtml(property)}</li>`).join("")}</ul>
+        </section>
+        <a class="loadout-source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">Open item page on Minecraft Fandom ↗</a>
+      </div>`;
+    elements.dialog.showModal();
+  }
+
   function setView(view) {
     state.view = view;
     elements.viewTabs.forEach((tab) => {
@@ -371,12 +618,13 @@
       tab.classList.toggle("is-active", active);
       tab.setAttribute("aria-selected", String(active));
     });
-    elements.filtersRow.hidden = view === "evaluator";
+    elements.filtersRow.hidden = view === "evaluator" || view === "loadout";
     elements.familyFilterRow.hidden = view === "evaluator";
     elements.sortControl.hidden = view !== "catalogue";
     elements.tierCategorySwitcher.hidden = true;
     elements.catalogueView.hidden = view !== "catalogue";
     elements.tierView.hidden = view !== "tier";
+    elements.loadoutView.hidden = view !== "loadout";
     elements.evaluatorView.hidden = view !== "evaluator";
     render();
   }
@@ -444,6 +692,8 @@
       renderCatalogue();
     } else if (state.view === "tier") {
       renderTierBoard();
+    } else if (state.view === "loadout") {
+      renderLoadouts();
     } else {
       renderEvaluatorOptions();
       renderEvaluationResult();
@@ -462,7 +712,7 @@
     const params = new URLSearchParams(window.location.search);
     const saved = localStorage.getItem("enchantment-theme");
     const nightOwlPreview = params.get("night-owl") === "1";
-    setTheme(nightOwlPreview || saved === "dark");
+    setTheme(nightOwlPreview || saved !== "light");
   }
 
   function bindEvents() {
@@ -574,6 +824,17 @@
     elements.tierBoard.addEventListener("click", (event) => {
       const button = event.target.closest("[data-record-id]");
       if (button) showDetailsById(button.dataset.recordId);
+    });
+    elements.loadoutGrid.addEventListener("click", (event) => {
+      const item = event.target.closest("[data-item-name]");
+      if (item) showLoadoutDetails(item.dataset.itemName);
+    });
+    elements.loadoutGrid.addEventListener("keydown", (event) => {
+      const item = event.target.closest("[data-item-name]");
+      if (item && (event.key === "Enter" || event.key === " ")) {
+        event.preventDefault();
+        showLoadoutDetails(item.dataset.itemName);
+      }
     });
 
     elements.clearSearch.addEventListener("click", () => {
