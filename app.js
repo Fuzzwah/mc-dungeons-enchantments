@@ -459,11 +459,16 @@
   }
 
   function initTheme() {
+    const params = new URLSearchParams(window.location.search);
     const saved = localStorage.getItem("enchantment-theme");
-    setTheme(saved === "dark");
+    const nightOwlPreview = params.get("night-owl") === "1";
+    setTheme(nightOwlPreview || saved === "dark");
   }
 
   function bindEvents() {
+    elements.themeToggle.addEventListener("click", () => {
+      setTheme(!document.body.classList.contains("dark-mode"));
+    });
     elements.viewTabs.forEach((tab) => tab.addEventListener("click", () => setView(tab.dataset.view)));
     elements.categoryFilters.addEventListener("click", (event) => {
       const button = event.target.closest("[data-category]");
