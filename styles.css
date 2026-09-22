@@ -1299,3 +1299,19 @@ body.dark-mode .tier-item .mini-placeholder {
     font-size: clamp(2rem, 10vw, 3.5rem);
   }
 }
+/* Evaluator controls use the cool night palette instead of the peach accent. */
+.evaluate-button {
+  color: #011627;
+  background: #82aaff;
+}
+.evaluate-button:hover {
+  color: #f4f0e6;
+  background: #ef5350;
+}
+.slot-picker-toggle img,
+.slot-picker-option img {
+  width: 42px;
+  height: 42px;
+  background: #011627;
+  border: 1px solid #28506a;
+}
