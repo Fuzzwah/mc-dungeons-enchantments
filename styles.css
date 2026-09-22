@@ -1133,6 +1133,28 @@ body.dark-mode .loadout-item-image {
   color: var(--muted);
   font: 700 .62rem/1.25 var(--mono);
 }
+.loadout-item-enchantments {
+  margin-top: 8px;
+}
+.loadout-item-enchantments-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--red);
+  font: 800 .62rem/1.2 var(--mono);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.loadout-item-enchantments > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.loadout-item-enchantments > div span {
+  padding: 3px 5px;
+  border: 1px solid var(--red);
+  color: var(--ink);
+  font: 700 .62rem/1.25 var(--mono);
+}
 .loadout-item-properties .loadout-rarity {
   color: var(--red);
   border-color: var(--red);
