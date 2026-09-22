@@ -12,6 +12,10 @@
     { id: "elemental", label: "Elemental Damage", color: "#ff7f8d", test: /fire|poison|lightning|thunder|shock|electr|freeze|chill|burn/i },
     { id: "control", label: "Crowd Control", color: "#65c7ff", test: /stun|bind|hold|slow|pull|gravity|levitation|chain/i },
     { id: "survival", label: "Survival & Healing", color: "#75df9b", test: /health|heal|shield|damage reduction|protect|weakening|potion/i },
+    { id: "speed", label: "Attack Speed", color: "#ffca67", test: /attack speed|attacks faster|fire faster|rapid fire|frenzied|rampaging|fast attacks|consecutive shots/i },
+    { id: "combo", label: "Combo Finishers", color: "#ff8f66", test: /last hit of a combo|combo|fifth powers up|echo/i },
+    { id: "lifesteal", label: "Life Steal & Sustain", color: "#f27c9b", test: /life steal|restore health|healing circle|healing|health on hit|leeching|radiance/i },
+    { id: "crit", label: "Critical Burst", color: "#f5e36b", test: /triple damage|critical|damage multiplier|high damage|burst/i },
   ];
   const loadoutDefinitions = [
     {
@@ -73,6 +77,46 @@
       weapons: [{ name: "Cursed Axe", tier: "S", note: "Sustained melee clearing keeps pressure off the back line." }, { name: "Heartstealer", tier: "A", note: "Healing on hit supports a close-range durable role." }],
       ranged: [{ name: "Slayer Crossbow", tier: "A", note: "Reliable ranged pressure while the tank holds the line." }, { name: "Bow of Lost Souls", tier: "B", note: "Adds safe soul generation to a defensive setup." }],
       artifacts: [{ name: "Iron Hide Amulet", tier: "S", note: "The defining defensive cooldown for a true tank." }, { name: "Totem of Regeneration", tier: "A", note: "Anchors a safe zone for the party." }, { name: "Gong of Weakening", tier: "A", note: "Makes dangerous elite windows manageable." }],
+    },
+    {
+      id: "speed",
+      label: "Attack Speed",
+      code: "F-07 / MOMENTUM ENGINE",
+      summary: "Stack attack-speed windows so every second in melee or at range produces more damage and more on-hit effects.",
+      armor: [{ name: "Wither Armor", tier: "S", note: "Keeps an aggressive speed build alive in the middle of a pack." }, { name: "Ember Robe", tier: "A", note: "Adds close-range burst while the faster attack loop is active." }],
+      weapons: [{ name: "Fighters Bindings", tier: "S", note: "The fastest melee platform turns every speed bonus into more hits." }, { name: "Firebrand", tier: "A", note: "Fast swings spread fire and keep pressure constant." }],
+      ranged: [{ name: "Auto Crossbow", tier: "S", note: "Sustained fire makes Accelerate and Rapid Fire easy to maintain." }, { name: "Harp Crossbow", tier: "A", note: "More projectiles create more chances to trigger on-hit effects." }],
+      artifacts: [{ name: "Death Cap Mushroom", tier: "S", note: "The defining attack-speed window for an aggressive rotation." }, { name: "Gong of Weakening", tier: "S", note: "Makes the speed window count against elites and bosses." }, { name: "Boots of Swiftness", tier: "A", note: "Gets the build into range and keeps the momentum going." }],
+    },
+    {
+      id: "combo",
+      label: "Combo Finishers",
+      code: "F-08 / FINAL HIT PAYLOAD",
+      summary: "Build around the last hit of each combo, then use positioning and crowd control to land finishers safely.",
+      armor: [{ name: "Ember Robe", tier: "S", note: "Close-range burst helps the finisher connect before the pack recovers." }, { name: "Spider Armor", tier: "A", note: "Life steal gives repeated combo attempts room to breathe." }],
+      weapons: [{ name: "Whirlwind", tier: "S", note: "Wide swings reliably reach the final-hit payoff." }, { name: "Anchor", tier: "A", note: "Heavy finishing hits reward deliberate timing and grouped targets." }],
+      ranged: [{ name: "Imploding Crossbow", tier: "A", note: "Groups enemies so one combo finisher can hit the whole pack." }, { name: "Harp Crossbow", tier: "B", note: "Keeps pressure on targets while waiting for the next melee opening." }],
+      artifacts: [{ name: "Wind Horn", tier: "S", note: "Creates a clean lane for the final hit." }, { name: "Shock Powder", tier: "S", note: "Stuns enemies during the combo timing window." }, { name: "Gong of Weakening", tier: "A", note: "Multiplies the impact of a successful finisher." }],
+    },
+    {
+      id: "lifesteal",
+      label: "Life Steal & Sustain",
+      code: "F-09 / BLOOD ECONOMY",
+      summary: "Trade space for reliable healing: stay engaged, keep hitting, and let life steal turn damage into durability.",
+      armor: [{ name: "Spider Armor", tier: "S", note: "The clearest life-steal foundation for a committed melee build." }, { name: "Wither Armor", tier: "A", note: "Damage reduction covers the gaps between healing hits." }],
+      weapons: [{ name: "Heartstealer", tier: "S", note: "Built-in healing reinforces Leeching and other sustain effects." }, { name: "Cursed Axe", tier: "A", note: "Wide clearing produces frequent healing opportunities." }],
+      ranged: [{ name: "Harp Crossbow", tier: "A", note: "Multiple projectiles provide safer healing and pressure support." }, { name: "Feral Soul Crossbow", tier: "B", note: "A ranged fallback that preserves soul and sustain options." }],
+      artifacts: [{ name: "Iron Hide Amulet", tier: "S", note: "Reduces incoming damage while healing catches up." }, { name: "Totem of Regeneration", tier: "A", note: "Adds a dependable recovery zone for difficult encounters." }, { name: "Gong of Weakening", tier: "A", note: "Lets life steal outpace incoming damage during elite fights." }],
+    },
+    {
+      id: "crit",
+      label: "Critical Burst",
+      code: "F-10 / DAMAGE SPIKE",
+      summary: "Create short, decisive damage windows by combining critical hits, multipliers, and enemy vulnerability.",
+      armor: [{ name: "Cave Crawler", tier: "S", note: "Artifact amplification gives critical windows a stronger opening." }, { name: "Archer's Armor", tier: "A", note: "Supports a safer ranged version of the burst plan." }],
+      weapons: [{ name: "Truthseeker", tier: "S", note: "Reliable damage lets critical multipliers finish priority targets." }, { name: "Fighters Bindings", tier: "A", note: "Many hits create more opportunities for a critical spike." }],
+      ranged: [{ name: "Elite Power Bow", tier: "S", note: "Charged shots and critical effects combine into boss-sized bursts." }, { name: "Firebolt Thrower", tier: "A", note: "Adds area pressure after the primary target takes the spike." }],
+      artifacts: [{ name: "Gong of Weakening", tier: "S", note: "The best setup tool for a single-target burst window." }, { name: "Satchel of Elements", tier: "A", note: "Adds flexible damage when the critical plan needs area coverage." }, { name: "Lightning Rod", tier: "A", note: "Converts a setup window into immediate burst damage." }],
     },
   ];
   const loadoutImageFiles = {
