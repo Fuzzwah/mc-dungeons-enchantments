@@ -119,6 +119,41 @@
       artifacts: [{ name: "Gong of Weakening", tier: "S", note: "The best setup tool for a single-target burst window." }, { name: "Satchel of Elements", tier: "A", note: "Adds flexible damage when the critical plan needs area coverage." }, { name: "Lightning Rod", tier: "A", note: "Converts a setup window into immediate burst damage." }],
     },
   ];
+  const loadoutRecommendationNames = {
+    speed: {
+      Armor: ["Cool Down", "Frenzied", "Swiftfooted"],
+      Melee: ["Rampaging", "Echo", "Radiance"],
+      Ranged: ["Accelerate", "Rapid Fire", "Multishot"],
+      Artifacts: ["Cool Down", "Speed Synergy", "Health Synergy"],
+    },
+    combo: {
+      Armor: ["Acrobat", "Protection", "Potion Barrier"],
+      Melee: ["Swirling", "Shockwave", "Echo"],
+      Ranged: ["Gravity", "Multishot", "Chain Reaction"],
+      Artifacts: ["Cool Down", "Health Synergy", "Speed Synergy"],
+    },
+    lifesteal: {
+      Armor: ["Potion Barrier", "Protection", "Health Synergy"],
+      Melee: ["Leeching", "Radiance", "Guarding Strike"],
+      Ranged: ["Radiance Shot", "Anima Conduit", "Soul Siphon"],
+      Artifacts: ["Health Synergy", "Cool Down", "Potion Barrier"],
+    },
+    crit: {
+      Armor: ["Cowardice", "Reckless", "Fire Focus"],
+      Melee: ["Critical Hit", "Committed", "Void Strike"],
+      Ranged: ["Critical Hit", "Overcharge", "Supercharge"],
+      Artifacts: ["Cool Down", "Cowardice", "Fire Focus"],
+    },
+  };
+
+  function loadoutRecommendations(loadoutId, category) {
+    const names = loadoutRecommendationNames[loadoutId]?.[category] || [];
+    const sourceCategory = category === "Artifacts" ? "Armor" : category;
+    return names
+      .map((name) => records.find((record) => record.category === sourceCategory && record.name === name))
+      .filter(Boolean);
+  }
+
   const loadoutImageFiles = {
     "Fighters Bindings": "Fighter's Bindings (MCD).png",
     "Archer's Armor": "Archer's Armor (MCD).png",
@@ -228,7 +263,7 @@
   function updateLoadoutMetadata() {
     document.querySelectorAll(".loadout-item").forEach((item) => {
       const meta = loadoutItemMeta.get(item.dataset.itemName);
-      const target = item.querySelector(".loadout-item-properties");
+      const target = item.querySelector(".loadout-item-source-properties");
       if (!meta || !target) return;
       target.innerHTML = `<span class="loadout-rarity">${escapeHtml(meta.rarity)}</span>${meta.properties.map((property) => `<span>${escapeHtml(property)}</span>`).join("")}`;
     });
@@ -667,7 +702,9 @@
             ["Melee", loadout.weapons],
             ["Ranged", loadout.ranged],
             ["Artifacts", loadout.artifacts],
-          ].map(([category, items]) => `
+          ].map(([category, items]) => {
+            const recommendations = loadoutRecommendations(loadout.id, category);
+            return `
             <section class="loadout-slot">
               <h4>${category}</h4>
               ${items.map((item) => `
@@ -676,11 +713,18 @@
                   <div>
                     <strong>${escapeHtml(item.name)}</strong>
                     <div class="loadout-item-properties"><span>${escapeHtml(item.note)}</span></div>
+                    <div class="loadout-item-enchantments">
+                      <span class="loadout-item-enchantments-label">Best enchantments</span>
+                      <div>${recommendations.map((enchantment) => `<span title="${escapeHtml(enchantment.description)}">${escapeHtml(enchantment.name)}</span>`).join("")}</div>
+                    </div>
+                    <div class="loadout-item-properties loadout-item-source-properties"></div>
                   </div>
                 </button>
               `).join("")}
             </section>
-          `).join("")}
+          `;
+          }).join("")}
+        </div>
         </div>
       </article>
     `).join("");
