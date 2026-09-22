@@ -1155,6 +1155,40 @@ body.dark-mode .loadout-item-image {
   color: var(--ink);
   font: 700 .62rem/1.25 var(--mono);
 }
+.loadout-enchantment {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.loadout-enchantment img,
+.loadout-enchantment-placeholder {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+}
+.loadout-enchantment-placeholder {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+}
+.loadout-dialog-enchantments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.loadout-dialog-enchantments .loadout-enchantment {
+  padding: 6px 8px;
+  border: 1px solid var(--red);
+  color: var(--ink);
+  font: 700 .72rem/1.2 var(--mono);
+}
+.loadout-dialog-enchantments .loadout-enchantment img,
+.loadout-dialog-enchantments .loadout-enchantment-placeholder {
+  flex-basis: 32px;
+  width: 32px;
+  height: 32px;
+}
 .loadout-item-properties .loadout-rarity {
   color: var(--red);
   border-color: var(--red);

@@ -12,7 +12,7 @@
     { id: "elemental", label: "Elemental Damage", color: "#ff7f8d", test: /fire|poison|lightning|thunder|shock|electr|freeze|chill|burn/i },
     { id: "control", label: "Crowd Control", color: "#65c7ff", test: /stun|bind|hold|slow|pull|gravity|levitation|chain/i },
     { id: "survival", label: "Survival & Healing", color: "#75df9b", test: /health|heal|shield|damage reduction|protect|weakening|potion/i },
-    { id: "speed", label: "Attack Speed", color: "#ffca67", test: /attack speed|attacks faster|fire faster|rapid fire|frenzied|rampaging|fast attacks|consecutive shots/i },
+    { id: "speed", label: "Attack Speed", color: "#ffca67", test: /attack speed|attacks faster|fire faster|rapid fire|frenzied|rampaging|fast attacks|consecutive shots|each attack|on-hit/i },
     { id: "combo", label: "Combo Finishers", color: "#ff8f66", test: /last hit of a combo|combo|fifth powers up|echo/i },
     { id: "lifesteal", label: "Life Steal & Sustain", color: "#f27c9b", test: /life steal|restore health|healing circle|healing|health on hit|leeching|radiance/i },
     { id: "crit", label: "Critical Burst", color: "#f5e36b", test: /triple damage|critical|damage multiplier|high damage|burst/i },
@@ -82,7 +82,7 @@
       id: "speed",
       label: "Attack Speed",
       code: "F-07 / MOMENTUM ENGINE",
-      summary: "Stack attack-speed windows so every second in melee or at range produces more damage and more on-hit effects.",
+      summary: "Stack attack-speed windows with per-hit damage so every extra swing compounds the next payoff.",
       armor: [{ name: "Wither Armor", tier: "S", note: "Keeps an aggressive speed build alive in the middle of a pack." }, { name: "Ember Robe", tier: "A", note: "Adds close-range burst while the faster attack loop is active." }],
       weapons: [{ name: "Fighters Bindings", tier: "S", note: "The fastest melee platform turns every speed bonus into more hits." }, { name: "Firebrand", tier: "A", note: "Fast swings spread fire and keep pressure constant." }],
       ranged: [{ name: "Auto Crossbow", tier: "S", note: "Sustained fire makes Accelerate and Rapid Fire easy to maintain." }, { name: "Harp Crossbow", tier: "A", note: "More projectiles create more chances to trigger on-hit effects." }],
@@ -122,8 +122,8 @@
   const loadoutRecommendationNames = {
     speed: {
       Armor: ["Cool Down", "Frenzied", "Swiftfooted"],
-      Melee: ["Rampaging", "Echo", "Radiance"],
-      Ranged: ["Accelerate", "Rapid Fire", "Multishot"],
+      Melee: ["Rampaging", "Echo", "Thundering"],
+      Ranged: ["Accelerate", "Rapid Fire", "Bonus Shot"],
       Artifacts: ["Cool Down", "Speed Synergy", "Health Synergy"],
     },
     combo: {
@@ -145,13 +145,49 @@
       Artifacts: ["Cool Down", "Cowardice", "Fire Focus"],
     },
   };
+  const itemRecommendationNames = {
+    "Ember Robe": ["Fire Focus", "Fire Aspect", "Cowardice"],
+    "Fox Armor": ["Acrobat", "Swiftfooted", "Multi-Roll"],
+    "Wither Armor": ["Protection", "Potion Barrier", "Cool Down"],
+    "Soul Dancer Robe": ["Bag of Souls", "Soul Focus", "Soul Speed"],
+    "Cave Crawler": ["Cool Down", "Health Synergy", "Cowardice"],
+    "Archer's Armor": ["Cool Down", "Cowardice", "Recycler"],
+    "Frost Bite": ["Chilling", "Protection", "Cool Down"],
+    "Spider Armor": ["Protection", "Potion Barrier", "Cool Down"],
+    "Stalwart Armor": ["Protection", "Potion Barrier", "Health Synergy"],
+    "Fighters Bindings": ["Rampaging", "Echo", "Thundering"],
+    "Whirlwind": ["Swirling", "Shockwave", "Echo"],
+    "Firebrand": ["Rampaging", "Fire Aspect", "Thundering"],
+    "Truthseeker": ["Committed", "Critical Hit", "Void Strike"],
+    "Gravity Hammer": ["Gravity", "Stunning", "Weakening"],
+    "Anchor": ["Committed", "Void Strike", "Guarding Strike"],
+    "Soul Fists": ["Soul Siphon", "Critical Hit", "Anima Conduit"],
+    "Heartstealer": ["Leeching", "Radiance", "Guarding Strike"],
+    "Cursed Axe": ["Leeching", "Exploding", "Void Strike"],
+    "Harp Crossbow": ["Multishot", "Chain Reaction", "Ricochet"],
+    "Auto Crossbow": ["Accelerate", "Rapid Fire", "Bonus Shot"],
+    "Feral Soul Crossbow": ["Soul Siphon", "Tempo Theft", "Piercing"],
+    "Bow of Lost Souls": ["Soul Siphon", "Anima Conduit", "Multishot"],
+    "Elite Power Bow": ["Overcharge", "Critical Hit", "Supercharge"],
+    "Firebolt Thrower": ["Power", "Multishot", "Fire Aspect"],
+    "Imploding Crossbow": ["Gravity", "Chain Reaction", "Multishot"],
+    "Slayer Crossbow": ["Power", "Piercing", "Tempo Theft"],
+  };
 
-  function loadoutRecommendations(loadoutId, category) {
-    const names = loadoutRecommendationNames[loadoutId]?.[category] || [];
+  function loadoutRecommendations(loadoutId, category, itemName) {
+    const names = itemRecommendationNames[itemName] || loadoutRecommendationNames[loadoutId]?.[category] || [];
     const sourceCategory = category === "Artifacts" ? "Armor" : category;
     return names
       .map((name) => records.find((record) => record.category === sourceCategory && record.name === name))
       .filter(Boolean);
+  }
+
+
+  function loadoutEnchantmentMarkup(enchantment) {
+    return `<span class="loadout-enchantment" title="${escapeHtml(enchantment.description)}">
+      ${enchantment.icon ? `<img src="${escapeHtml(enchantment.icon)}" alt="" width="24" height="24" loading="lazy">` : `<span class="loadout-enchantment-placeholder">?</span>`}
+      <span>${escapeHtml(enchantment.name)}</span>
+    </span>`;
   }
 
   const loadoutImageFiles = {
@@ -703,24 +739,25 @@
             ["Ranged", loadout.ranged],
             ["Artifacts", loadout.artifacts],
           ].map(([category, items]) => {
-            const recommendations = loadoutRecommendations(loadout.id, category);
             return `
             <section class="loadout-slot">
               <h4>${category}</h4>
-              ${items.map((item) => `
-                <button class="loadout-item" type="button" data-item-name="${escapeHtml(item.name)}">
+              ${items.map((item) => {
+                const recommendations = loadoutRecommendations(loadout.id, category, item.name);
+                return `
+                <button class="loadout-item" type="button" data-item-name="${escapeHtml(item.name)}" data-loadout-id="${escapeHtml(loadout.id)}" data-loadout-category="${escapeHtml(category)}">
                   ${loadoutImageMarkup(item.name)}
                   <div>
                     <strong>${escapeHtml(item.name)}</strong>
                     <div class="loadout-item-properties"><span>${escapeHtml(item.note)}</span></div>
                     <div class="loadout-item-enchantments">
-                      <span class="loadout-item-enchantments-label">Best enchantments</span>
-                      <div>${recommendations.map((enchantment) => `<span title="${escapeHtml(enchantment.description)}">${escapeHtml(enchantment.name)}</span>`).join("")}</div>
+                      <span class="loadout-item-enchantments-label">${category === "Artifacts" ? "Best supporting enchantments" : "Best enchantments"}</span>
+                      <div>${recommendations.map(loadoutEnchantmentMarkup).join("")}</div>
                     </div>
                     <div class="loadout-item-properties loadout-item-source-properties"></div>
                   </div>
                 </button>
-              `).join("")}
+              `}).join("")}
             </section>
           `;
           }).join("")}
@@ -732,13 +769,28 @@
     resolveLoadoutMetadata();
   }
 
-  function showLoadoutDetails(name) {
-    const item = loadoutDefinitions
-      .flatMap((loadout) => [...loadout.armor, ...loadout.weapons, ...loadout.ranged, ...loadout.artifacts])
-      .find((entry) => entry.name === name);
+  function showLoadoutDetails(name, loadoutId, category) {
+    const loadout = loadoutDefinitions.find((entry) => entry.id === loadoutId)
+      || loadoutDefinitions.find((entry) => [...entry.armor, ...entry.weapons, ...entry.ranged, ...entry.artifacts].some((item) => item.name === name));
+    const categoryItems = loadout ? {
+      Armor: loadout.armor,
+      Melee: loadout.weapons,
+      Ranged: loadout.ranged,
+      Artifacts: loadout.artifacts,
+    }[category] : null;
+    const item = categoryItems?.find((entry) => entry.name === name)
+      || loadoutDefinitions
+        .flatMap((entry) => [...entry.armor, ...entry.weapons, ...entry.ranged, ...entry.artifacts])
+        .find((entry) => entry.name === name);
+    const recommendations = loadout && category
+      ? loadoutRecommendations(loadout.id, category, name)
+      : [];
     const meta = loadoutItemMeta.get(name);
     const image = [...document.querySelectorAll(".loadout-item-image")]
-      .find((entry) => entry.closest("[data-item-name]")?.dataset.itemName === name);
+      .find((entry) => {
+        const owner = entry.closest("[data-item-name]");
+        return owner?.dataset.itemName === name && (!loadoutId || owner.dataset.loadoutId === loadoutId);
+      });
     const sourceUrl = meta?.sourceUrl || `https://minecraft.fandom.com/wiki/Minecraft_Dungeons:${encodeURIComponent(loadoutPageName(name).replaceAll(" ", "_"))}`;
     const properties = meta?.properties?.length ? meta.properties : [item?.note || "Metadata is loading from the source page."];
     elements.dialogContent.innerHTML = `
@@ -755,6 +807,12 @@
           <h3>Properties</h3>
           <ul class="loadout-dialog-properties">${properties.map((property) => `<li>${escapeHtml(property)}</li>`).join("")}</ul>
         </section>
+        ${recommendations.length ? `
+          <section class="dialog-section">
+            <h3>${category === "Artifacts" ? "Best supporting enchantments" : "Best enchantments for this build"}</h3>
+            <div class="loadout-dialog-enchantments">${recommendations.map(loadoutEnchantmentMarkup).join("")}</div>
+          </section>
+        ` : ""}
         <a class="loadout-source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">Open item page on Minecraft Fandom ↗</a>
       </div>`;
     elements.dialog.showModal();
@@ -975,13 +1033,13 @@
     });
     elements.loadoutGrid.addEventListener("click", (event) => {
       const item = event.target.closest("[data-item-name]");
-      if (item) showLoadoutDetails(item.dataset.itemName);
+      if (item) showLoadoutDetails(item.dataset.itemName, item.dataset.loadoutId, item.dataset.loadoutCategory);
     });
     elements.loadoutGrid.addEventListener("keydown", (event) => {
       const item = event.target.closest("[data-item-name]");
       if (item && (event.key === "Enter" || event.key === " ")) {
         event.preventDefault();
-        showLoadoutDetails(item.dataset.itemName);
+        showLoadoutDetails(item.dataset.itemName, item.dataset.loadoutId, item.dataset.loadoutCategory);
       }
     });
 
