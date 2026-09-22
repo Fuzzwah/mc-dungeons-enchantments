@@ -222,7 +222,7 @@
     sort: "name",
     itemName: "",
     itemCategory: "Melee",
-    slots: ["", "", ""],
+    slots: Array(9).fill(""),
   };
 
   const elements = {
@@ -432,8 +432,8 @@
     if (!selected.length) {
       elements.evaluationResult.innerHTML = `
         <div class="evaluation-empty">
-          <strong>Select at least one enchantment</strong>
-          <span>The evaluator will average the selected enchantment tier ratings.</span>
+          <strong>Select at least one enchantment option</strong>
+          <span>The evaluator will average the selected enchantment option ratings.</span>
         </div>`;
       return;
     }
@@ -451,17 +451,22 @@
         <div class="evaluation-copy">
           <p class="section-kicker">${escapeHtml(state.itemCategory)} item report</p>
           <h3>${escapeHtml(itemName)}</h3>
-          <p>Average enchantment rating: <strong>${score.toFixed(1)} / 5</strong> across ${selected.length} selected slot${selected.length === 1 ? "" : "s"}.</p>
+          <p>Average enchantment rating: <strong>${score.toFixed(1)} / 5</strong> across ${selected.length} selected option${selected.length === 1 ? "" : "s"}.</p>
         </div>
       </div>
       <div class="evaluation-slots">
-        ${state.slots.map((id, index) => {
-          const item = records.find((record) => record.id === id);
-          return `<div class="evaluation-slot">
-            <span>Slot ${index + 1}</span>
-            ${item ? `<strong>${escapeHtml(item.name)}</strong><em class="mini-rank" style="--rank-color:${rankColors[item.rank]}">${item.rank} · ${rankLabels[item.rank]}</em>` : "<strong class=\"unfilled-slot\">Not selected</strong>"}
-          </div>`;
-        }).join("")}
+        ${[0, 1, 2].map((slot) => `
+          <div class="evaluation-slot">
+            <span>Slot ${slot + 1}</span>
+            ${state.slots.slice(slot * 3, slot * 3 + 3).map((id, option) => {
+              const item = records.find((record) => record.id === id);
+              return `<div class="evaluation-option">
+                <span>Option ${option + 1}</span>
+                ${item ? `<strong>${escapeHtml(item.name)}</strong><em class="mini-rank" style="--rank-color:${rankColors[item.rank]}">${item.rank} · ${rankLabels[item.rank]}</em>` : "<strong class=\"unfilled-slot\">Not selected</strong>"}
+              </div>`;
+            }).join("")}
+          </div>
+        `).join("")}
       </div>`;
   }
 
@@ -747,7 +752,7 @@
 
     elements.itemCategory.addEventListener("change", () => {
       state.itemCategory = elements.itemCategory.value;
-      state.slots = ["", "", ""];
+      state.slots = Array(9).fill("");
       renderEvaluatorOptions();
       renderEvaluationResult();
     });
