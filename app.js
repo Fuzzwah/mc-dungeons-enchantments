@@ -223,6 +223,8 @@
     itemName: "",
     itemCategory: "Melee",
     slots: Array(9).fill(""),
+    pickerIndex: 0,
+    pickerQuery: "",
   };
 
   const elements = {
@@ -248,6 +250,10 @@
     dialog: document.querySelector("#details-dialog"),
     dialogContent: document.querySelector("#dialog-content"),
     dialogClose: document.querySelector(".dialog-close"),
+    pickerDialog: document.querySelector("#picker-dialog"),
+    pickerDialogTitle: document.querySelector("#picker-dialog-title"),
+    pickerSearch: document.querySelector("#picker-search"),
+    pickerOptions: document.querySelector("#picker-options"),
     evaluatorForm: document.querySelector("#evaluator-form"),
     itemName: document.querySelector("#item-name"),
     itemCategory: document.querySelector("#item-category"),
@@ -378,6 +384,12 @@
     }
     return `<img class="${className}" src="${escapeHtml(item.icon)}" alt="" width="72" height="72" loading="lazy">`;
   }
+  function enchantmentSmallMarkup(item, extraClass = "") {
+    return `<span class="enchantment-small ${extraClass}">
+      ${iconMarkup(item, "enchantment-small-icon")}
+      <span class="enchantment-small-copy"><strong>${escapeHtml(item.name)}</strong><em>${item.rank} · ${escapeHtml(rankLabels[item.rank])}</em></span>
+    </span>`;
+  }
 
   function evaluatorOptions() {
     return records
@@ -400,20 +412,28 @@
         picker = select.parentElement.querySelector(".custom-slot-picker");
       }
       picker.innerHTML = `
-        <button class="slot-picker-toggle" type="button" aria-haspopup="listbox" aria-expanded="false">
-          ${selectedItem ? `<img src="${escapeHtml(selectedItem.icon)}" alt="" width="42" height="42"><span>${escapeHtml(selectedItem.name)}<em>${selectedItem.rank} tier</em></span>` : "<span>Choose an enchantment</span>"}
+        <button class="slot-picker-toggle" type="button" aria-haspopup="dialog" aria-expanded="false">
+          ${selectedItem ? `<img src="${escapeHtml(selectedItem.icon)}" alt="" width="84" height="84"><span>${escapeHtml(selectedItem.name)}<em>${selectedItem.rank} tier</em></span>` : "<span>Choose an enchantment</span>"}
           <span class="picker-chevron" aria-hidden="true">⌄</span>
-        </button>
-        <div class="slot-picker-menu" role="listbox" hidden>
-          <button class="slot-picker-option is-empty" type="button" role="option" data-slot-value="">Clear slot</button>
-          ${options.map((item) => `
-            <button class="slot-picker-option ${item.id === selected ? "is-selected" : ""}" type="button" role="option" data-slot-value="${escapeHtml(item.id)}">
-              <img src="${escapeHtml(item.icon)}" alt="" width="42" height="42">
-              <span>${escapeHtml(item.name)}<em>${item.rank} tier · ${rankLabels[item.rank]}</em></span>
-            </button>
-          `).join("")}
-        </div>`;
+        </button>`;
     });
+  }
+
+  function renderPickerModalOptions() {
+    const selected = state.slots[state.pickerIndex];
+    const query = state.pickerQuery.trim().toLowerCase();
+    const options = evaluatorOptions().filter((item) => {
+      if (!query) return true;
+      return `${item.name} ${item.rank} ${rankLabels[item.rank]} ${item.rarity}`.toLowerCase().includes(query);
+    });
+    elements.pickerOptions.innerHTML = `
+      <button class="picker-modal-option is-empty" type="button" role="option" data-slot-value="">Clear slot</button>
+      ${options.map((item) => `
+        <button class="picker-modal-option ${item.id === selected ? "is-selected" : ""}" type="button" role="option" data-slot-value="${escapeHtml(item.id)}">
+          <img src="${escapeHtml(item.icon)}" alt="" width="84" height="84">
+          <span>${escapeHtml(item.name)}<em>${item.rank} tier · ${rankLabels[item.rank]}</em></span>
+        </button>
+      `).join("") || `<p class="picker-no-results">No enchantments match that filter.</p>`}`;
   }
 
   function evaluationRank(score) {
@@ -441,6 +461,24 @@
     const score = selected.reduce((total, item) => total + rankScore[item.rank], 0) / selected.length;
     const rank = evaluationRank(score);
     const itemName = state.itemName || "Unnamed item";
+    const slotItems = [0, 1, 2].map((slot) => state.slots
+      .slice(slot * 3, slot * 3 + 3)
+      .map((id) => records.find((record) => record.id === id))
+      .filter(Boolean));
+    const strongestBySlot = slotItems.map((items) => {
+      const bestScore = Math.max(...items.map((item) => rankScore[item.rank]), -1);
+      return items.filter((item) => rankScore[item.rank] === bestScore);
+    });
+    const familyCounts = new Map();
+    selected.forEach((item) => getFamilies(item).forEach((family) => {
+      familyCounts.set(family, (familyCounts.get(family) || 0) + 1);
+    }));
+    const playstyleCombos = [...familyCounts.entries()]
+      .filter(([, count]) => count >= 2)
+      .sort((a, b) => b[1] - a[1])
+      .map(([id, count]) => ({ family: familyDefinitions.find((entry) => entry.id === id), count }))
+      .filter((entry) => entry.family);
+
     elements.evaluationResult.innerHTML = `
       <div class="evaluation-summary" style="--rank-color:${rankColors[rank]}">
         <div class="evaluation-rating">
@@ -454,19 +492,37 @@
           <p>Average enchantment rating: <strong>${score.toFixed(1)} / 5</strong> across ${selected.length} selected option${selected.length === 1 ? "" : "s"}.</p>
         </div>
       </div>
-      <div class="evaluation-slots">
-        ${[0, 1, 2].map((slot) => `
-          <div class="evaluation-slot">
-            <span>Slot ${slot + 1}</span>
-            ${state.slots.slice(slot * 3, slot * 3 + 3).map((id, option) => {
-              const item = records.find((record) => record.id === id);
-              return `<div class="evaluation-option">
-                <span>Option ${option + 1}</span>
-                ${item ? `<strong>${escapeHtml(item.name)}</strong><em class="mini-rank" style="--rank-color:${rankColors[item.rank]}">${item.rank} · ${rankLabels[item.rank]}</em>` : "<strong class=\"unfilled-slot\">Not selected</strong>"}
-              </div>`;
-            }).join("")}
+      <div class="evaluation-insights">
+        <section class="evaluation-insight strongest-options">
+          <h4>Strongest options</h4>
+          <div>
+            ${strongestBySlot.map((items, slot) => `
+              <div class="evaluation-recommendation"><span>Slot ${slot + 1}</span><div>${items.length ? items.map((item) => enchantmentSmallMarkup(item, "is-recommended")).join("") : "<strong>No selection</strong>"}</div></div>
+            `).join("")}
           </div>
-        `).join("")}
+        </section>
+        <section class="evaluation-insight playstyle-combos">
+          <h4>Playstyle synergy</h4>
+          ${playstyleCombos.length
+            ? `<p>These choices reinforce a shared build direction:</p><div>${playstyleCombos.map(({ family, count }) => `<span style="--family-color:${family.color}">${escapeHtml(family.label)} · ${count} matches</span>`).join("")}</div>`
+            : "<p>No strong playstyle combo yet. Try options with matching effect themes.</p>"}
+        </section>
+      </div>
+      <div class="evaluation-slots">
+        ${[0, 1, 2].map((slot) => {
+          const strongestIds = new Set(strongestBySlot[slot].map((item) => item.id));
+          return `
+            <div class="evaluation-slot">
+              <span>Slot ${slot + 1}</span>
+              ${state.slots.slice(slot * 3, slot * 3 + 3).map((id, option) => {
+                const item = records.find((record) => record.id === id);
+                return `<div class="evaluation-option ${item && strongestIds.has(item.id) ? "is-strongest" : ""}">
+                  <span>Option ${option + 1}${item && strongestIds.has(item.id) ? " · strongest" : ""}</span>
+                  ${item ? enchantmentSmallMarkup(item) : "<strong class=\"unfilled-slot\">Not selected</strong>"}
+                </div>`;
+              }).join("")}
+            </div>`;
+        }).join("")}
       </div>`;
   }
 
@@ -757,6 +813,10 @@
       renderEvaluationResult();
     });
 
+    elements.itemName.addEventListener("input", () => {
+      state.itemName = elements.itemName.value.trim();
+      renderEvaluationResult();
+    });
     elements.evaluatorForm.addEventListener("submit", (event) => {
       event.preventDefault();
       state.itemName = elements.itemName.value.trim();
@@ -772,35 +832,30 @@
 
     elements.slotFields.addEventListener("click", (event) => {
       const toggle = event.target.closest(".slot-picker-toggle");
-      if (toggle) {
-        const picker = toggle.closest(".custom-slot-picker");
-        const menu = picker.querySelector(".slot-picker-menu");
-        const open = menu.hidden;
-        document.querySelectorAll(".slot-picker-menu").forEach((otherMenu) => {
-          otherMenu.hidden = true;
-          otherMenu.previousElementSibling?.setAttribute("aria-expanded", "false");
-        });
-        menu.hidden = !open;
-        toggle.setAttribute("aria-expanded", String(open));
-        return;
-      }
-
-      const option = event.target.closest(".slot-picker-option");
-      if (!option) return;
-      const picker = option.closest(".custom-slot-picker");
-      const index = Number(picker.dataset.slotPicker);
-      state.slots[index] = option.dataset.slotValue;
-      elements.slotSelects[index].value = state.slots[index];
-      renderEvaluatorOptions();
-      renderEvaluationResult();
+      if (!toggle) return;
+      const picker = toggle.closest(".custom-slot-picker");
+      state.pickerIndex = Number(picker.dataset.slotPicker);
+      state.pickerQuery = "";
+      elements.pickerSearch.value = "";
+      elements.pickerDialogTitle.textContent = `Choose an option for slot ${Math.floor(state.pickerIndex / 3) + 1}`;
+      renderPickerModalOptions();
+      elements.pickerDialog.showModal();
+      elements.pickerSearch.focus();
     });
 
-    document.addEventListener("click", (event) => {
-      if (event.target.closest(".custom-slot-picker")) return;
-      document.querySelectorAll(".slot-picker-menu").forEach((menu) => {
-        menu.hidden = true;
-        menu.previousElementSibling?.setAttribute("aria-expanded", "false");
-      });
+    elements.pickerSearch.addEventListener("input", () => {
+      state.pickerQuery = elements.pickerSearch.value;
+      renderPickerModalOptions();
+    });
+
+    elements.pickerOptions.addEventListener("click", (event) => {
+      const option = event.target.closest(".picker-modal-option");
+      if (!option) return;
+      state.slots[state.pickerIndex] = option.dataset.slotValue;
+      elements.slotSelects[state.pickerIndex].value = state.slots[state.pickerIndex];
+      elements.pickerDialog.close();
+      renderEvaluatorOptions();
+      renderEvaluationResult();
     });
 
     elements.search.addEventListener("input", () => {
