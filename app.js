@@ -533,7 +533,7 @@
       return `<p class="built-in-items" title="${escapeHtml(itemText)}">Found on ${escapeHtml(itemText)}</p>`;
     }
     return `<div class="tier-preview" aria-label="Tier values">
-      ${values.map((value, index) => `<div><span>${["I", "II", "III"][index]}</span><strong title="${escapeHtml(value)}">${escapeHtml(value)}</strong></div>`).join("")}
+      ${values.map((value, index) => `<div><span class="tier-preview-diamond"><span>${["I", "II", "III"][index]}</span></span><strong title="${escapeHtml(value)}">${escapeHtml(value)}</strong></div>`).join("")}
     </div>`;
   }
 

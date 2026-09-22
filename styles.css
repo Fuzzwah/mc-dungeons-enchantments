@@ -1667,3 +1667,52 @@ body.dark-mode .evaluator-form input::placeholder {
     font-size: clamp(1.8rem, 9vw, 3.2rem);
   }
 }
+/* Tier values use a consistent Roman-numeral marker without implying a preferred tier. */
+.dialog-upgrade-row.is-current {
+  color: inherit;
+  background: transparent;
+}
+.tier-preview > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tier-preview-diamond {
+  display: grid !important;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  color: #f4f0e6 !important;
+  background: #ef5350;
+  transform: rotate(45deg);
+}
+.tier-preview-diamond > span {
+  color: #f4f0e6 !important;
+  font: 700 .62rem var(--mono) !important;
+  transform: rotate(-45deg);
+}
+body.dark-mode .dialog-upgrade-row.is-current {
+  color: #d6deeb;
+  background: transparent;
+}
+.enchantment-card:hover .category-tag,
+.enchantment-card:hover .rarity-tag,
+.enchantment-card:hover .family-tag,
+.enchantment-card:focus-visible .category-tag,
+.enchantment-card:focus-visible .rarity-tag,
+.enchantment-card:focus-visible .family-tag {
+  color: var(--ink);
+  background: var(--yellow);
+  border-color: var(--yellow);
+}
+body.dark-mode .enchantment-card:hover .category-tag,
+body.dark-mode .enchantment-card:hover .rarity-tag,
+body.dark-mode .enchantment-card:hover .family-tag,
+body.dark-mode .enchantment-card:focus-visible .category-tag,
+body.dark-mode .enchantment-card:focus-visible .rarity-tag,
+body.dark-mode .enchantment-card:focus-visible .family-tag {
+  color: #011627;
+  background: #82aaff;
+  border-color: #82aaff;
+}
