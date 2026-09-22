@@ -159,7 +159,6 @@
               </div>
             </fieldset>
           </div>
-          <button class="evaluate-button" type="submit">Evaluate item</button>
         </form>
         <div id="evaluation-result" class="evaluation-result" aria-live="polite"></div>
       </section>
@@ -186,8 +185,22 @@
       </button>
       <div id="dialog-content"></div>
     </dialog>
+    <dialog id="picker-dialog" class="picker-dialog" aria-labelledby="picker-dialog-title">
+      <form method="dialog" class="picker-dialog-head">
+        <div>
+          <p class="section-kicker">Enchantment picker</p>
+          <h2 id="picker-dialog-title">Choose an option</h2>
+        </div>
+        <button class="dialog-close picker-dialog-close" type="submit" aria-label="Close enchantment picker">×</button>
+      </form>
+      <label class="picker-search">
+        <span class="sr-only">Filter enchantments</span>
+        <input id="picker-search" type="search" placeholder="Filter by name, tier, or rarity…" autocomplete="off">
+      </label>
+      <div id="picker-options" class="picker-options" role="listbox" aria-label="Available enchantments"></div>
+    </dialog>
 
     <script src="data.js?v=2"></script>
-    <script src="app.js?v=items6"></script>
+    <script src="app.js?v=items9"></script>
   </body>
 </html>
