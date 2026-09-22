@@ -1,3 +1,5 @@
+html, body { overflow-x: clip; }
+
 :root {
   --paper: #f1efe8;
   --white: #fffdf7;
@@ -1239,4 +1241,61 @@ body.dark-mode .tier-item .mini-placeholder {
 .tier-item .mini-placeholder {
   width: 60px;
   height: 60px;
+}
+/* Mobile type should wrap at word boundaries, not split words into fragments. */
+@media (max-width: 600px) {
+  .brand-lockup > div:last-child,
+  h1 {
+    min-width: 0;
+  }
+  h1 { font-size: clamp(2rem, 9.5vw, 5rem); }
+  .section-heading h2,
+  .tier-intro h2,
+  .evaluator-intro h2,
+  .loadout-intro h2 {
+    min-width: 0;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+    text-wrap: balance;
+    font-size: clamp(2.35rem, 12vw, 4.2rem);
+  }
+  .card-name,
+  .evaluation-copy h3,
+  .loadout-panel h3,
+  .dialog-hero h2 {
+    min-width: 0;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: none;
+    text-wrap: balance;
+  }
+  .loadout-panel-head {
+    display: block;
+  }
+  .loadout-panel-head .loadout-stamp {
+    display: inline-block;
+    margin-top: 12px;
+  }
+}
+@media (max-width: 360px) {
+  h1 { font-size: clamp(1.7rem, 8vw, 2.2rem); }
+}
+@media (max-width: 600px) {
+  .tier-preview,
+  .tier-preview > div {
+    min-width: 0;
+  }
+  .tier-preview strong {
+    font-size: clamp(.72rem, 3.2vw, 1.05rem);
+    white-space: nowrap;
+  }
+}
+@media (max-width: 360px) {
+  .section-heading h2,
+  .tier-intro h2,
+  .evaluator-intro h2,
+  .loadout-intro h2 {
+    font-size: clamp(2rem, 10vw, 3.5rem);
+  }
 }
