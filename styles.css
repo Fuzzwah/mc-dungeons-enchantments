@@ -1315,3 +1315,56 @@ body.dark-mode .tier-item .mini-placeholder {
   background: #011627;
   border: 1px solid #28506a;
 }
+.enchantment-slot-group {
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+}
+.enchantment-slot-group legend {
+  padding: 0 6px;
+  color: var(--yellow);
+  font: 700 .68rem var(--mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.slot-options {
+  display: grid;
+  gap: 10px;
+}
+.slot-options .slot-field > span {
+  color: var(--text-secondary, var(--muted));
+}
+.slot-picker-toggle img,
+.slot-picker-option img {
+  width: 84px;
+  height: 84px;
+}
+.slot-picker-toggle {
+  min-height: 96px;
+}
+.slot-picker-option {
+  min-height: 100px;
+}
+.evaluation-option + .evaluation-option {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.evaluation-option > span {
+  display: block;
+  color: var(--muted);
+  font: 700 .58rem var(--mono);
+  text-transform: uppercase;
+}
+@media (max-width: 900px) {
+  .slot-fields { grid-template-columns: 1fr; }
+}
+.slot-field {
+  position: relative;
+  min-width: 0;
+}
+.native-slot-select {
+  top: 0;
+  left: 0;
+}
