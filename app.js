@@ -183,54 +183,10 @@
   }
 
 
-  function loadoutEnchantmentMarkup(enchantment) {
-    return `<span class="loadout-enchantment" title="${escapeHtml(enchantment.description)}">
-      ${enchantment.icon ? `<img src="${escapeHtml(enchantment.icon)}" alt="" width="24" height="24" loading="lazy">` : `<span class="loadout-enchantment-placeholder">?</span>`}
-      <span>${escapeHtml(enchantment.name)}</span>
-    </span>`;
-  }
-
-  const loadoutImageFiles = {
-    "Fighters Bindings": "Fighter's Bindings (MCD).png",
-    "Archer's Armor": "Archer's Armor (MCD).png",
-    "Soul Dancer Robe": "Souldancer Robe (MCD).png",
-    "Gravity Hammer": "Hammer of Gravity (MCD).png",
-  };
 
   function loadoutImageMarkup(name) {
-    const filename = loadoutImageFiles[name] || `${name} (MCD).png`;
-    return `<img class="loadout-item-image" data-file-name="${escapeHtml(filename)}" alt="" width="48" height="48" loading="lazy">`;
-  }
-
-  async function resolveLoadoutImages() {
-    const images = [...document.querySelectorAll(".loadout-item-image")];
-    const filenames = [...new Set(images.map((image) => image.dataset.fileName))];
-    if (!filenames.length) return;
-    const params = new URLSearchParams({
-      action: "query",
-      titles: filenames.map((filename) => `File:${filename}`).join("|"),
-      prop: "imageinfo",
-      iiprop: "url",
-      format: "json",
-      origin: "*",
-    });
-    try {
-      const response = await fetch(`https://minecraft.fandom.com/api.php?${params}`);
-      const data = await response.json();
-      const urls = new Map(
-        Object.values(data.query?.pages || {}).map((page) => [
-          page.title.replace(/^File:/, "").replaceAll("_", " "),
-          page.imageinfo?.[0]?.url,
-        ])
-      );
-      images.forEach((image) => {
-        const source = urls.get(image.dataset.fileName);
-        if (source) image.src = source;
-        else image.hidden = true;
-      });
-    } catch {
-      images.forEach((image) => { image.hidden = true; });
-    }
+    const slug = name.toLowerCase().replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    return `<img class="loadout-item-image" src="assets/gear/${slug}.png" alt="" width="48" height="48" loading="lazy">`;
   }
 
   const loadoutPageNames = {
@@ -750,11 +706,11 @@
                   <div>
                     <strong>${escapeHtml(item.name)}</strong>
                     <div class="loadout-item-properties"><span>${escapeHtml(item.note)}</span></div>
+                    <div class="loadout-item-properties loadout-item-source-properties"></div>
                     <div class="loadout-item-enchantments">
                       <span class="loadout-item-enchantments-label">${category === "Artifacts" ? "Best supporting enchantments" : "Best enchantments"}</span>
-                      <div>${recommendations.map(loadoutEnchantmentMarkup).join("")}</div>
+                      <div>${recommendations.map(enchantmentSmallMarkup).join("")}</div>
                     </div>
-                    <div class="loadout-item-properties loadout-item-source-properties"></div>
                   </div>
                 </button>
               `}).join("")}
@@ -765,7 +721,6 @@
         </div>
       </article>
     `).join("");
-    resolveLoadoutImages();
     resolveLoadoutMetadata();
   }
 
@@ -810,7 +765,7 @@
         ${recommendations.length ? `
           <section class="dialog-section">
             <h3>${category === "Artifacts" ? "Best supporting enchantments" : "Best enchantments for this build"}</h3>
-            <div class="loadout-dialog-enchantments">${recommendations.map(loadoutEnchantmentMarkup).join("")}</div>
+            <div class="loadout-dialog-enchantments">${recommendations.map(enchantmentSmallMarkup).join("")}</div>
           </section>
         ` : ""}
         <a class="loadout-source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noreferrer">Open item page on Minecraft Fandom ↗</a>
